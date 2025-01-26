@@ -1,17 +1,17 @@
-﻿using MediatR;
-using Microsoft.AspNetCore.Mvc;
-using AutoMapper;
+﻿using Microsoft.AspNetCore.Mvc;
 using Ambev.DeveloperEvaluation.WebApi.Common;
 using Ambev.DeveloperEvaluation.WebApi.Features.Users.CreateUser;
 using Ambev.DeveloperEvaluation.WebApi.Features.Users.GetUser;
 using Ambev.DeveloperEvaluation.WebApi.Features.Users.DeleteUser;
-using Ambev.DeveloperEvaluation.Application.Users.CreateUser;
-using Ambev.DeveloperEvaluation.Application.Users.GetUser;
-using Ambev.DeveloperEvaluation.Application.Users.DeleteUser;
 using Ambev.DeveloperEvaluation.WebApi.Features.Users.ListUsers;
-using Ambev.DeveloperEvaluation.Application.Users.ListUsers;
-using Ambev.DeveloperEvaluation.Application.Users.UpdateUser;
 using Ambev.DeveloperEvaluation.WebApi.Features.Users.UpdateUser;
+using Ambev.DeveloperEvaluation.Application.Users.UpdateUser;
+using Ambev.DeveloperEvaluation.Application.Users.ListUsers;
+using Ambev.DeveloperEvaluation.Application.Users.DeleteUser;
+using Ambev.DeveloperEvaluation.Application.Users.GetUser;
+using Ambev.DeveloperEvaluation.Application.Users.CreateUser;
+using AutoMapper;
+using MediatR;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Users;
 
@@ -75,9 +75,8 @@ public class UsersController : BaseController
     [HttpGet]
     [ProducesResponseType(typeof(PaginatedResponse<ListUsersResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> ListUsers([FromQuery] int _page, [FromQuery] int _size, [FromQuery] string? _order, CancellationToken cancellationToken)
+    public async Task<IActionResult> ListUsers([FromQuery] ListUsersRequest request, CancellationToken cancellationToken)
     {
-        var request = new ListUsersRequest { Page = _page, Size = _size, Order = _order };
         var validator = new ListUsersRequestValidator();
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 

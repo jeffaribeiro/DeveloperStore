@@ -27,7 +27,11 @@ namespace Ambev.DeveloperEvaluation.Application.Users.ListUsers
             if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
 
-            var (users, totalItems) = await _userRepository.ListUsersAsync(query.Page, query.Size, query.Order);
+            var filters = query.Filters
+                .Where(f => !string.IsNullOrEmpty(f.Value))
+                .ToDictionary(f => f.Key, f => f.Value);
+
+            var (users, totalItems) = await _userRepository.ListUsersAsync(query.Page, query.Size, query.Order, filters);
 
             return _mapper.Map<ListUsersResult>((users, totalItems));
         }

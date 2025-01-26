@@ -29,7 +29,7 @@ public interface IUserRepository
     /// - Users: A list of users matching the specified criteria.
     /// - TotalItems: The total number of users before pagination.
     /// </returns>
-    Task<(IEnumerable<User> Users, int TotalItems)> ListUsersAsync(int page, int size, string? order);
+    Task<(IEnumerable<User> Users, int TotalItems)> ListUsersAsync(int page, int size, string? order, IDictionary<string, string?> filters);
 
     /// <summary>
     /// Retrieves a user by their unique identifier

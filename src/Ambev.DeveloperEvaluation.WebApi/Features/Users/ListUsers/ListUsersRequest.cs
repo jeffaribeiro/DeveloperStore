@@ -1,4 +1,7 @@
-﻿namespace Ambev.DeveloperEvaluation.WebApi.Features.Users.ListUsers
+﻿using Ambev.DeveloperEvaluation.WebApi.Common;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Ambev.DeveloperEvaluation.WebApi.Features.Users.ListUsers
 {
     /// <summary>
     /// Request to retrieve a paginated list of users
@@ -30,5 +33,11 @@
         /// The ordering criteria
         /// </summary>
         public string? Order { get; set; }
+
+        /// <summary>
+        /// Filters to apply to the query as key-value pairs.
+        /// </summary>
+        [ModelBinder(BinderType = typeof(FiltersModelBinder))]
+        public IDictionary<string, string?> Filters { get; set; } = new Dictionary<string, string?>();
     }
 }

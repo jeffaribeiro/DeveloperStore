@@ -7,8 +7,9 @@ namespace Ambev.DeveloperEvaluation.Application.Users.ListUsers
     /// </summary>
     public class ListUsersQuery : IRequest<ListUsersResult>
     {
-        public int Page { get; set; } = 1;
-        public int Size { get; set; } = 10;
+        public int Page { get; set; }
+        public int Size { get; set; }
         public string? Order { get; set; }
+        public IDictionary<string, string?> Filters { get; set; } = new Dictionary<string, string?>();
     }
 }

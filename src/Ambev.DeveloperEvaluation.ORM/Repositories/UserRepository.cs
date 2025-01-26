@@ -48,10 +48,18 @@ public class UserRepository : IUserRepository
     /// - Users: A list of users matching the specified criteria.
     /// - TotalItems: The total number of users before pagination.
     /// </returns>
-    public async Task<(IEnumerable<User> Users, int TotalItems)> ListUsersAsync(int page, int size, string? order)
+    public async Task<(IEnumerable<User> Users, int TotalItems)> ListUsersAsync(
+        int page,
+        int size,
+        string? order,
+        IDictionary<string, string?> filters)
     {
         var query = _context.Users.AsQueryable();
 
+        // Apply filters
+        query = query.ApplyFilters(filters);
+
+        // Apply ordering
         if (!string.IsNullOrEmpty(order))
         {
             var orderClauses = order.Split(',');
