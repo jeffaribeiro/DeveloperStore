@@ -53,7 +53,7 @@ namespace Ambev.DeveloperEvaluation.ORM.Extensions
         /// <param name="source">The source queryable to apply filtering to.</param>
         /// <param name="filters">A dictionary of filters where keys are property names and values are filter values.</param>
         /// <returns>The queryable with the specified filters applied.</returns>
-        public static IQueryable<T> ApplyFilters<T>(this IQueryable<T> source, IDictionary<string, string?> filters)
+        /*public static IQueryable<T> ApplyFilters<T>(this IQueryable<T> source, IDictionary<string, string?> filters)
         {
             var parameter = Expression.Parameter(typeof(T), "x");
             Expression? predicate = null;
@@ -75,6 +75,78 @@ namespace Ambev.DeveloperEvaluation.ORM.Extensions
 
                 // Partial matches (*)
                 if (filterValue.Contains("*"))
+                {
+                    var value = filterValue.Replace("*", string.Empty);
+                    var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+                    var toLowerMethod = typeof(string).GetMethod("ToLower", Type.EmptyTypes);
+
+                    var propertyToLower = Expression.Call(propertyAccess, toLowerMethod!);
+                    var valueExpression = Expression.Constant(value.ToLower());
+                    condition = Expression.Call(propertyToLower, containsMethod!, valueExpression);
+                }
+                // Exact matches
+                else
+                {
+                    var value = Convert.ChangeType(filterValue, propertyAccess.Type);
+                    var valueExpression = Expression.Constant(value);
+                    condition = Expression.Equal(propertyAccess, valueExpression);
+                }
+
+                // Combine conditions (AND logic)
+                predicate = predicate == null ? condition : Expression.AndAlso(predicate, condition);
+            }
+
+            // Retorna todos os registros se não houver filtros válidos
+            if (predicate == null)
+                return source;
+
+            var lambda = Expression.Lambda<Func<T, bool>>(predicate, parameter);
+            return source.Where(lambda);
+        }
+        */
+
+        public static IQueryable<T> ApplyFilters<T>(this IQueryable<T> source, IDictionary<string, string?> filters)
+        {
+            var parameter = Expression.Parameter(typeof(T), "x");
+            Expression? predicate = null;
+
+            foreach (var filter in filters)
+            {
+                var propertyPath = filter.Key; // Exemplo: "name.firstname" ou "_minPrice"
+                var filterValue = filter.Value;
+
+                if (string.IsNullOrEmpty(filterValue))
+                    continue;
+
+                // Trata prefixos para ranges (_min e _max)
+                bool isMinFilter = propertyPath.StartsWith("_min", StringComparison.OrdinalIgnoreCase);
+                bool isMaxFilter = propertyPath.StartsWith("_max", StringComparison.OrdinalIgnoreCase);
+                string actualPropertyName = propertyPath;
+
+                if (isMinFilter)
+                    actualPropertyName = propertyPath.Substring(4); // Remove o prefixo "_min"
+                else if (isMaxFilter)
+                    actualPropertyName = propertyPath.Substring(4); // Remove o prefixo "_max"
+
+                // Resolve a propriedade (incluindo aninhadas)
+                var propertyAccess = ResolvePropertyAccess(parameter, actualPropertyName);
+                if (propertyAccess == null)
+                    continue;
+
+                Expression condition;
+
+                // Filtragem por intervalos (_min e _max)
+                if (isMinFilter || isMaxFilter)
+                {
+                    var targetValue = Convert.ChangeType(filterValue, propertyAccess.Type);
+                    var constantValue = Expression.Constant(targetValue);
+
+                    condition = isMinFilter
+                        ? Expression.GreaterThanOrEqual(propertyAccess, constantValue) // _min: >=
+                        : Expression.LessThanOrEqual(propertyAccess, constantValue);  // _max: <=
+                }
+                // Partial matches (*)
+                else if (filterValue.Contains("*"))
                 {
                     var value = filterValue.Replace("*", string.Empty);
                     var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
