@@ -54,6 +54,7 @@ public class UsersController : BaseController
             return BadRequest(validationResult.Errors);
 
         var command = _mapper.Map<CreateUserCommand>(request);
+        
         var response = await _mediator.Send(command, cancellationToken);
 
         return Created(string.Empty, new ApiResponseWithData<CreateUserResponse>
@@ -84,6 +85,7 @@ public class UsersController : BaseController
             return BadRequest(validationResult.Errors);
 
         var query = _mapper.Map<ListUsersQuery>(request);
+        
         var response = await _mediator.Send(query, cancellationToken);
 
         var data = _mapper.Map<ListUsersResult, (IEnumerable<ListUsersResponse>, int)>(response);
@@ -144,13 +146,6 @@ public class UsersController : BaseController
 
         var response = await _mediator.Send(command, cancellationToken);
 
-        if (response == null)
-            return NotFound(new ApiResponse
-            {
-                Success = false,
-                Message = "User not found"
-            });
-
         var data = _mapper.Map<DeleteUserResponse>(response);
 
         return OkCustomResponse(data, "User deleted successfully");
@@ -180,13 +175,6 @@ public class UsersController : BaseController
         var command = _mapper.Map<UpdateUserCommand>(request);
 
         var response = await _mediator.Send(command, cancellationToken);
-
-        if (response == null)
-            return NotFound(new ApiResponse
-            {
-                Success = false,
-                Message = "User not found"
-            });
 
         var data = _mapper.Map<UpdateUserResponse>(response);
 
